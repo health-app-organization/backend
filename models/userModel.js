@@ -5,21 +5,25 @@ const sequelize = require('../db/database');
 const User = sequelize.define('User', {
     firstName: {
         type: DataTypes.STRING(30),
-        allowNull: false,
+        allowNull: true,
     },
 
     lastName: {
         type: DataTypes.STRING(30),
-        allowNull: false,
+        allowNull: true,
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
     },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     birthDate: {
         type: DataTypes.DATEONLY,
-        allowNull: false,
+        allowNull: true,
     },
 
     gender: {

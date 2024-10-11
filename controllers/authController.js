@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
     // TODO: generate token
     const token = jwt.sign(
         {
-            user: { id: user.id, email: user.email, role: status }
+            payload: { id: user.id, email: user.email, role: status }
         },
         env.TOKEN_SECRET,
         { expiresIn: `${env.TOKEN_EXPIRE_TIME / 60}h` }
@@ -42,18 +42,18 @@ exports.login = async (req, res) => {
 }
 
 exports.me = async (req, res) => {
-    const { user } = req;
+    const { payload } = req;
 
 
-    if (!user) {
+    if (!payload) {
         return res.status(401).json({ error: "Unauthorized" });
     }
 
     let userObj;
 
-    if (user.role === 'user') {
+    if (payload.role === 'user') {
         userObj = await User.findOne({
-            where: { id: user.id }
+            where: { id: payload.id }
         })
     } else {
 

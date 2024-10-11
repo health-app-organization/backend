@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const OTP = require("../models/otpModel");
+const { generateOTP } = require('../utils/otpGetnerator');
 
 
 exports.createOTP = async (req, res) => {
@@ -48,14 +49,3 @@ exports.verifyOTP = async (req, res) => {
     })
 
 };
-
-
-function generateOTP(length) {
-    // Generate a random 6-digit OTP
-    let otp = "";
-    for (let i = 0; i < length; i++) {
-        otp += Math.floor(Math.random() * 10);
-    }
-
-    return otp;
-}

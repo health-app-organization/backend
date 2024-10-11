@@ -16,7 +16,7 @@ exports.authenticateToken = (req, res, next) => {
         process.env.TOKEN_SECRET,
         (err, decoded) => {
             if (err) return res.status(400).json({ error: err });
-            req.user = decoded.user
+            req.payload = decoded.payload
             next();
         }
     )

@@ -3,12 +3,15 @@ const User = require('../models/userModel');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const { env } = require('process');
+const jwt = require('jsonwebtoken');
+const { sendEmail } = require('../services/email.service');
+const { generateOTP } = require('../utils/otpGetnerator');
+const bcryptjs = require('bcryptjs');
 
 dotenv.config();
-const env = process.env;
 
 // Forgot password logic
-exports.forgotPassword = async (req, res) => {
+exports.verifyEmail = async (req, res) => {
     try {
         const user = await User.findOne(
             {
@@ -20,51 +23,96 @@ exports.forgotPassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Generate a password reset token
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        let otp = generateOTP(6);
 
-        const expirationTime = env.PASSWORD_RESET_TOKEN_EXPIRE_TIME * 60 * 1000; // Token expires in 1 hour
+        let to = user.email;
+        let subject = 'HEALTHAPP';
+        let html = `<h1>Welcome to HEALTHAPP</h1>
+        <p>Hi,</p>
+        <p>We received a request to change your password</p>
+        <p>Use the OTP below to change your password</p>
+        <h1 style="margin: 20px; font-size: 20px;">${otp}</h1>`;
 
-        const token = jwt.sign({}, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+        let emailSendStatus = 'initial';
 
-        //TODO
-        //verify email
-        //generate a jwt token 
-        //send response with token
+        await sendEmail(to, subject, '', html)
+            .then((res) => {
+                emailSendStatus = 'success';
+                //console.log(res);
+            })
+            .catch((err) => {
+                emailSendStatus = 'failed';
+                console.log(err);
+            });
 
+        //generate token
+        const jwtToken = jwt.sign(
+            {
+                payload: {
+                    email: user.email,
+                    otp: otp
+                }
+            },
+            process.env.TOKEN_SECRET,
+            { expiresIn: process.env.PASSWORD_OTP_EXPIRE_TIME * 60 }
+        );
 
-
-
-
-        // Send reset token via email (you'd typically integrate an email service here)
-        // sendEmail(user.email, resetToken);
-
-        res.status(200).json({ message: 'Password reset token sent to email' });
+        return res.status(200).json({
+            message: 'OTP sent to your email',
+            otp: otp,
+            emailSendStatus: emailSendStatus,
+            token: jwtToken
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error });
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
 
-// Change password logic (after receiving token)
-exports.changePassword = async (req, res) => {
-    try {
-        const user = await User.findOne({
-            resetPasswordToken: req.body.token,
-            resetPasswordExpires: { $gt: Date.now() }
+
+exports.verifyOTP = async (req, res) => {
+    const { payload, body } = req;
+    if (!payload) return res.status(401).json({ error: "Unauthorized" });
+
+    if (body.email !== payload.email) return res.status(401).json({ error: "Unauthorized" });
+
+    if (body.otp !== payload.otp) return res.status(401).json({ error: "Invalid OTP" });
+
+    //const resetToken = crypto.randomBytes(32).toString('hex');
+
+    const token = jwt.sign(
+        {
+            payload: {
+                type: 'password_reset',
+                email: body.email
+            }
+        },
+        process.env.TOKEN_SECRET,
+        {
+            expiresIn: process.env.PASSWORD_RESET_TOKEN_EXPIRE_TIME * 60 //1h
         });
 
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
-        }
-
-        // Update the password
-        user.password = req.body.newPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
-
-        res.status(200).json({ message: 'Password updated successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error });
-    }
+    return res.status(200).json({
+        message: 'Password reset approved',
+        token: token
+    })
 };
+
+exports.resetPassword = async (req, res) => {
+    const { payload, body } = req;
+    if (!payload || payload.type !== 'password_reset') return res.status(401).json({ error: "Unauthorized" });
+
+    if (body.password !== body.confirmPassword) return res.status(400).json({ error: "Passwords do not match" });
+
+    const user = await User.update(
+        { password: await bcryptjs.hash(body.password, 10) },
+        {
+            where: {
+                email: payload.email
+            },
+        },
+    );
+
+    return res.status(200).json({
+        message: 'Password reset successful'
+    });
+}
