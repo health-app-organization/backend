@@ -31,6 +31,36 @@ const User = sequelize.define('User', {
         defaultValue: 'male'
     },
 
+    bloodGroup: {
+        type: DataTypes.ENUM('A', 'B', 'AB', 'O'),
+        defaultValue: 'A'
+    },
+
+    height: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+
+    weight: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+
+    activityLevel: {
+        type: DataTypes.ENUM('sedentary', 'lightlyActive', 'moderatelyActive', 'veryActive', 'extraActive'),
+        defaultValue: 'sedentary'
+    },
+
+    foodPreferences: {
+        type: DataTypes.ENUM('vegetarian', 'nonVegetarian', 'vegan', 'pescatarian'),
+        defaultValue: 'nonVegetarian'
+    },
+
+    occupation: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+    },
+
     password: {
         type: DataTypes.STRING,
         allowNull: false,

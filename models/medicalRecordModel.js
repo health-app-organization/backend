@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize');
-const bcryptjs = require('bcryptjs');
 const sequelize = require('../db/database');
 const User = require('./userModel');
 
@@ -8,14 +7,17 @@ const MedicalRecord = sequelize.define('MedicalRecord', {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     currentMedication: {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     pastMedication: {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     chronicDisease: {
         type: DataTypes.STRING,
         allowNull: true
@@ -24,14 +26,17 @@ const MedicalRecord = sequelize.define('MedicalRecord', {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     sugeries: {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     smokingHabits: {
         type: DataTypes.STRING,
         allowNull: true
     },
+
     alcoholConsumption: {
         type: DataTypes.STRING,
         allowNull: true

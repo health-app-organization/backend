@@ -20,7 +20,7 @@ exports.createUser = async (req, res) => {
         newUser.password = undefined;
         res.status(201).json(newUser);
     } catch (error) {
-        res.status(400).json({ message: 'Error creating user', error });
+        res.status(400).json({ message: 'Error creating user', error: error.message });
     }
 };
 
@@ -36,3 +36,31 @@ exports.getUserById = async (req, res) => {
         res.status(500).json({ message: 'Error fetching user', error });
     }
 };
+
+exports.updateUser = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await user.update(req.body);
+        user.password = undefined;
+        return res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user', error });
+    }
+}
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const user = await User.destroy({
+            where: {
+                id: req.params.id
+            }
+        });
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting user', error });
+    }
+}
+
