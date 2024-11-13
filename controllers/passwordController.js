@@ -1,5 +1,5 @@
 const { where } = require('sequelize');
-const User = require('../models/userModel');
+const User = require('../models/users/userModel');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const { env } = require('process');

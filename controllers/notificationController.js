@@ -1,5 +1,5 @@
 const bcryptjs = require('bcryptjs');
-const Notification = require('../models/notificationModel');
+const Notification = require('../models/shared/notificationModel');
 const { DELETE } = require('sequelize/lib/query-types');
 
 

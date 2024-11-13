@@ -1,4 +1,4 @@
-const Order = require('../models/orderModel');
+const Order = require('../models/users/orderModel');
 const { DELETE } = require('sequelize/lib/query-types');
 
 

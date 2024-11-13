@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const User = require('../models/users/userModel');
+const Provider = require('../models/providers/providerModel');
 const dotenv = require('dotenv');
 dotenv.config();
 const env = process.env
@@ -65,13 +66,25 @@ exports.register = async (req, res) => {
                 phone: phone,
             });
         } else {
+            let provider = await Provider.findOne({
+                where: { email: email }
+            })
 
+            if (provider) {
+                return res.status(400).json({ error: "Provider already exists" });
+            }
+
+            provider = await Provider.create({
+                email: email,
+                passworPd: password,
+                phone: phone,
+            });
         }
 
-        res.status(200).json({ message: 'User created successfully', user: user });
+        res.status(200).json({ message: 'Provider created successfully', user: user });
     }
     catch (error) {
-        res.status(500).json({ message: "Error creating user", error: error.message });
+        res.status(500).json({ message: "Error creating provider", error: error.message });
     }
 }
 
@@ -90,7 +103,9 @@ exports.me = async (req, res) => {
             where: { id: payload.id }
         })
     } else {
-
+        userObj = await Provider.findOne({
+            where: { id: payload.id }
+        })
     }
 
     if (!userObj) {

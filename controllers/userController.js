@@ -1,5 +1,5 @@
 const bcryptjs = require('bcryptjs');
-const User = require('../models/userModel');
+const User = require('../models/users/userModel');
 const { DELETE } = require('sequelize/lib/query-types');
 
 

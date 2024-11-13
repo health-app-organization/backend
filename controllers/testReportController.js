@@ -1,4 +1,4 @@
-const TestReport = require('../models/testReportModel');
+const TestReport = require('../models/users/testReportModel');
 const { DELETE } = require('sequelize/lib/query-types');
 
 
