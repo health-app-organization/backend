@@ -22,6 +22,7 @@ exports.getAllUsers = async (req, res) => {
         if (metadata) {
             const total = await User.count();
             const totalPages = Math.ceil(total / count);
+
             let pagemetadata = {
                 currentPage: Number(page),
                 numPerPage: Number(count),
@@ -68,6 +69,7 @@ exports.updateUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
         await user.update(req.body);
         user.password = undefined;
         return res.status(200).json(user);

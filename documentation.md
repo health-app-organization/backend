@@ -28,6 +28,12 @@
 
     - [Reset Password](#reset-password)
 
+4. appointments
+  - [show all appointments](#show-all-appointments)
+  - [show appointment by userid] (#show-appointment-by-userid)
+  - [create appointment](#create-appointment)
+  - [update appointment](#update-appointment)
+  - [delete appointment](#delete-appointment)
 4. notifications
 
     a. show notifications
@@ -738,7 +744,271 @@
             error: "Unauthorized"
           }
 
-        
+  <a id="#show-all-appointments"></a>
+
+  ## Show all appointments
+
+  *Show all appointments.*
+
+- **URL**
+
+  /appointments
+
+- **Method**
+
+  `GET`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`(Unprotected for now)
+
+- **URL Params**
+
+  none
+
+- **Query Params**
+
+  page: `number` (optional)
+  count: `number` (optional)
+  state: `string enum` (optional) [upcoming, completed, cancelled]
+  metadata: `boolean` (optional) [true, false]
+
+- **Success Response:**
+
+- **Data Params**
+
+  none
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+  {
+    data: [
+    {
+      "id": 1,
+      "dateTime": "2024-11-22T00:00:00.000Z",
+      "durationMins": 60,
+      "status": "upcoming",
+      "urgency": "high",
+      "location": "Clinic A",
+      "consultationType": "clinic",
+      "createdAt": "2024-11-16T09:26:50.000Z",
+      "updatedAt": "2024-11-18T20:55:41.000Z",
+      "providerId": 2,
+      "userId": 1,
+      "Provider": {
+        "id": 2,
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "middleName": "Ann",
+        "category": "nurse"
+      }
+  },
+  ]
+  }
+- **Error Response:**
+ 
+ - **Code:** 500 INTERNAL SERVER ERROR
+
+      **Content:** 
+
+          { 
+            error:  error
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+
+
+<a id="#show-appointment-by-userid"></a>
+
+## Show user/provider appointments
+
+  *Show all appointments by user/provider id.*
+
+- **URL**
+
+  /appointments
+
+- **Method**
+
+  `GET`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`(Unprotected for now)
+
+- **URL Params**
+
+  - **id:** `number` (optional)
+  - **status:** `string enum` (optional) [user, provider]
+
+
+- **Query Params**
+
+  page: `number` (optional)
+  count: `number` (optional)
+  state: `string enum` (optional) [upcoming, completed, cancelled]
+  metadata: `boolean` (optional) [true, false]
+
+- **Success Response:**
+
+- **Data Params**
+
+  none
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+  {
+    data: [
+    {
+      "id": 1,
+      "dateTime": "2024-11-22T00:00:00.000Z",
+      "durationMins": 60,
+      "status": "upcoming",
+      "urgency": "high",
+      "location": "Clinic A",
+      "consultationType": "clinic",
+      "createdAt": "2024-11-16T09:26:50.000Z",
+      "updatedAt": "2024-11-18T20:55:41.000Z",
+      "providerId": 2,
+      "userId": 1,
+      "Provider": {
+        "id": 2,
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "middleName": "Ann",
+        "category": "nurse"
+      }
+  },
+  ]
+  }
+- **Error Response:**
+ 
+ - **Code:** 500 INTERNAL SERVER ERROR
+
+      **Content:** 
+
+          { 
+            error:  error
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+
+<a id="#create-appointment"></a>
+
+## Create Appointment
+
+*Create a new appointment.*
+
+- **URL**
+
+  /appointments/create
+
+- **Method**
+
+  `POST`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`
+
+- **URL Params**
+
+    none
+
+- **Query Params**
+
+    none
+
+- **Data Params**
+
+  - **dateTime:** `string` (required)
+  - **durationMins:** `string` (required)
+  - **urgency:** `string` (required)
+  - **location:** `string` (required)
+  - **consultationType:** `string` (required)
+  - **providerId:** `string` (required)
+  - **userId:** `string` (required)
+
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+
+        {
+          `new appointment obj`
+        }
+
+- **Error Response:**
+ 
+ - **Code:** 400 BAD REQUEST
+
+      **Content:** 
+
+          { 
+            error:  "Passwords do not match"
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+
+  <a id="#update-appointment"></a>
+
+  ## Update Appointment
+
+*Update an existing appointment.*
+
+- **URL**
+
+  /appointments/update/:id
+
+- **Method**
+
+  `PUT`
+
+  <a id="#delete-appointment"></a>
+
+  ## Delete Appointment
+
+*Delete an existing appointment.*
+
+- **URL**
+
+  /appointments/delete/:id
+
+- **Method**
+
+  `DELETE`
+
+
+
 
 
 
