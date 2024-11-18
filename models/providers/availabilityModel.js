@@ -25,15 +25,13 @@ const Availability = sequelize.define('Availability',
             allowNull: false,
         },
 
-        providerId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+        service: {
+            type: DataTypes.ENUM('Consultation', 'Visitation'),
+            allowNull: false,
         }
     })
+
+Availability.belongsTo(Provider, { foreignKey: 'providerId' });
+Provider.hasMany(Availability, { foreignKey: 'providerId' });
 
 module.exports = Availability;

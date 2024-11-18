@@ -7,7 +7,7 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 
-sequelize.sync({})
+sequelize.sync({ alter: true })
     .then(() => {
         console.log('Database connected and models synced.');
         httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));

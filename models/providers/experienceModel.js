@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../../db/database');
 const Provider = require('./providerModel');
 
-const Charge = sequelize.define('Charge',
+const Experience = sequelize.define('Experience',
     {
         id: {
             type: DataTypes.INTEGER,
@@ -29,16 +29,9 @@ const Charge = sequelize.define('Charge',
             type: DataTypes.STRING(50),
             allowNull: false
         },
-
-        providerId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        }
     })
 
-module.exports = Charge;
+Provider.hasMany(Experience, { foreignKey: 'providerId' });
+Experience.belongsTo(Provider, { foreignKey: 'providerId' });
+
+module.exports = Experience;

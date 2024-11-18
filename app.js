@@ -4,15 +4,14 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const { Server } = require('socket.io');
 const { authenticate } = require('./controllers/chatController');
-const fetch = require('node-fetch');
+//const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
-const chatRoot = `http://${HOST}:${PORT}/chat`;
-console.log(chatRoot);
+const api = `http://${HOST}:${PORT}`;
 
 //Import middleware
 const auth = require('./middleware/authenticateToken');
@@ -36,42 +35,21 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const testReportRoutes = require('./routes/testReportRoutes');
 const chatRoutes = require('./routes/chatRoutes');
-const { log } = require('console');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const providerRoutes = require('./routes/providerRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
 
-
-//Chat routes
-//app.use('/chat', chatRoutes);
 
 app.use('/chat', chatRoutes);
-
-app.use('/verify', (req, res) => {
-    let valid = authenticate(1);
-    res.send(`<h1>${valid ? 'Valid User' : 'Invalid User'}</h1>`)
-})
-
-// User routes
 app.use('/users', userRoutes);
-
-//OTP routes
 app.use('/otp', otpRoutes);
-
-//auth routes
 app.use('/auth', authRoutes);
-
-//Notification routes
 app.use('/notifications', notificationRoutes);
-
-app.use('/healthapp-backend', function (req, res) {
-    res.set("Content-Type", "text/html;charset=utf-8");
-    res.send("<h1>Hello from node app</h1>");
-})
-
-
-//Order routes
+app.use('/appointments', appointmentRoutes);
 app.use('/orders', orderRoutes);
-
-//Report routes
 app.use('/reports', testReportRoutes);
+app.use('/providers', providerRoutes);
+app.use('/transactions', transactionRoutes);
 
 // Error handling for undefined routes
 app.use((req, res, next) => {
@@ -79,30 +57,34 @@ app.use((req, res, next) => {
 });
 
 const io = new Server(httpServer, {
-
+    cors: {
+        origin: api,
+        credentials: true
+    }
 });
 
 
+global.onlineUsers = new Map();
+
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('chat message', async (msg) => {
 
-        const response = await fetch(`${chatRoot}/add`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(msg),
-            }
-        )
-
-        const savedMessage = await response.json();
-
-        console.log(savedMessage);
-
-        // io.emit('chat message', savedMessage);
+    global.chatSocket = socket;
+    socket.on('add-user', async (userId) => {
+        console.log(`user${userId} connected`);
+        onlineUsers.set(userId, socket.id);
+        console.log(onlineUsers);
     });
+
+    socket.on('send-msg', (data) => {
+        console.log('Message sent');
+        console.log(data);
+        const sendUserSocket = onlineUsers.get(data.providerId);
+        if (sendUserSocket) {
+            socket.to(sendUserSocket).emit('msg-recieve', data.message);
+            console.log(data);
+        }
+    })
 
     socket.on('disconnect', () => {
         console.log('A user disconnected');

@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../db/database');
 const Provider = require('./providerModel');
+const User = require('../users/userModel');
 
 const Review = sequelize.define('Review',
     {
@@ -11,29 +12,28 @@ const Review = sequelize.define('Review',
         },
 
         review: {
-            type: DataTypes.STRING(300),
+            type: DataTypes.STRING(500),
             allowNull: false
         },
 
-        userId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+        rating: {
+            type: DataTypes.TINYINT,
+            allowNull: false
         },
 
-        providerId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        }
+        isFavorite: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+
+        },
+
     })
+
+User.hasMany(Review, { foreignKey: 'userId' });
+Provider.hasMany(Review, { foreignKey: 'providerId' });
+
+Review.belongsTo(User, { foreignKey: 'userId' });
+Review.belongsTo(Provider, { foreignKey: 'providerId' });
+
 
 module.exports = Review;

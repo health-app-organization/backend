@@ -10,10 +10,13 @@ const Specialization = sequelize.define('Specialization',
             primaryKey: true
         },
 
-        specialization: {
-            type: DataTypes.STRING(20),
+        name: {
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
+    },
+    {
+        timestamps: false,
     })
 
 module.exports = Specialization;

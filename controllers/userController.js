@@ -1,12 +1,37 @@
 const bcryptjs = require('bcryptjs');
 const User = require('../models/users/userModel');
+const { paginate, getFields } = require('../utils/services');
 const { DELETE } = require('sequelize/lib/query-types');
 
 
 // Controller logic for handling user routes
 exports.getAllUsers = async (req, res) => {
+    const { page, count, fields } = req.query;
+    let { metadata } = req.query
+
+    if (page && metadata !== false)
+        metadata = true;
+
+
     try {
-        const users = await User.findAll({ attributes: { exclude: ['password'] } });
+        const users = await User.findAll({
+            attributes: fields ? ['id', ...getFields(fields)] : { exclude: ['password'] },
+            ...paginate(page, count)
+        });
+
+        if (metadata) {
+            const total = await User.count();
+            const totalPages = Math.ceil(total / count);
+            let pagemetadata = {
+                currentPage: Number(page),
+                numPerPage: Number(count),
+                totalPages: totalPages,
+                totalItems: total
+            }
+
+            return res.status(200).json({ data: users, metadata: pagemetadata });
+        }
+
         return res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving users', error });

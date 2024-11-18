@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../db/database');
 const Provider = require('../providers/providerModel');
+const User = require('../users/userModel');
 
 const Appointment = sequelize.define('Appointment',
     {
@@ -8,14 +9,6 @@ const Appointment = sequelize.define('Appointment',
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
-        },
-
-        userId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            }
         },
 
         dateTime: {
@@ -47,16 +40,22 @@ const Appointment = sequelize.define('Appointment',
             type: DataTypes.ENUM('home', 'clinic', 'video'),
             defaultValue: 'clinic'
         },
-
-        providerId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        }
     })
+
+Provider.hasMany(Appointment, {
+    foreignKey: 'providerId'
+})
+
+Appointment.belongsTo(Provider, {
+    foreignKey: 'providerId'
+})
+
+User.hasMany(Appointment, {
+    foreignKey: 'userId'
+})
+
+Appointment.belongsTo(User, {
+    foreignKey: 'userId'
+})
 
 module.exports = Appointment;

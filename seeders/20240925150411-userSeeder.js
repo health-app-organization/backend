@@ -1,34 +1,46 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-
-    await queryInterface.bulkInsert('users', [{
-      firstName: 'Denen',
-      lastName: 'Awar',
-      email: 'awardenen@gmail.com',
-      password: '12345',
-      birthDate: '1999-09-25',
-      createdAt: new Date(),
-      gender: 'male'
-    },
-    {
-      firstName: 'Babayomi',
-      lastName: 'Yomzeew',
-      email: 'yomizeew@gmail.com',
-      password: '12345',
-      birthDate: '1990-10-09',
-      createdAt: new Date(),
-      gender: 'male'
-    }
+  up: async (queryInterface, Sequelize) => {
+    return queryInterface.bulkInsert('users', [
+      {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'johndoe@example.com',
+        phoneNumber: '+1234567890',
+        birthDate: '1985-06-15',
+        gender: 'male',
+        bloodGroup: 'O',
+        height: 175.5,
+        weight: 72.5,
+        activityLevel: 'moderatelyActive',
+        foodPreferences: 'nonVegetarian',
+        occupation: 'Engineer',
+        password: '$2b$10$saltsaltsaltsalt', // Hashed password in a real application
+        role: 'user',
+        createdAt: new Date()
+      },
+      {
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'janesmith@example.com',
+        phoneNumber: '+0987654321',
+        birthDate: '1992-03-22',
+        gender: 'female',
+        bloodGroup: 'A',
+        height: 160.0,
+        weight: 55.0,
+        activityLevel: 'lightlyActive',
+        foodPreferences: 'vegetarian',
+        occupation: 'Teacher',
+        password: '$2b$10$saltsaltsaltsalt', // Hashed password in a real application
+        role: 'admin',
+        createdAt: new Date()
+      }
     ], {});
-
   },
 
-  async down(queryInterface, Sequelize) {
-
-    await queryInterface.bulkDelete('users', null, {});
-
+  down: async (queryInterface, Sequelize) => {
+    return queryInterface.bulkDelete('users', null, {});
   }
 };

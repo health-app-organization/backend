@@ -10,11 +10,11 @@ const Transaction = sequelize.define('Transaction',
             primaryKey: true
         },
         amount: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
         type: {
-            type: DataTypes.STRING,
+            type: DataTypes.ENUM('credit', 'debit'),
             allowNull: false
         },
         date: {
@@ -25,13 +25,13 @@ const Transaction = sequelize.define('Transaction',
             type: DataTypes.STRING,
             allowNull: false
         },
-        userId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: User,
-                key: 'id'
-            }
-        }
-    })
+    }, {
+    timestamps: false,
+}
+)
+
+User.hasMany(Transaction, { foreignKey: 'userId' });
+Transaction.belongsTo(User, { foreignKey: 'userId' });
+
 
 module.exports = Transaction;

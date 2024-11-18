@@ -24,6 +24,19 @@
             backdrop-filter: blur(10px);
         }
 
+        .user {
+            border: none;
+            padding: 5px 15px;
+            background-color: gray;
+            color: white;
+            border-radius: 100px;
+            margin: 5px;
+        }
+
+        .user:hover {
+            cursor: pointer;
+        }
+
         input {
             border: none;
             padding: 0 1rem;
@@ -67,6 +80,10 @@
 </head>
 
 <body>
+    <div>
+        <button onclick="toggleConnection(1)" id="user1">User: 1</button>
+        <button onclick="toggleConnection(3)" id="user3">User: 3</button>
+    </div>
     <ul id="messages"></ul>
     <form id="form" action="">
         <input id="user_id" type="number" placeholder="user" min="0">
@@ -76,7 +93,61 @@
 
     <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
     <script>
-        const socket = io();
+        let socket = io();
+
+        async function getOnlineUsers() {
+            let connected;
+            try {
+                const res = await fetch(`http://localhost:4000/chat/get_online_users`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    connected = data;
+                } else {
+                    console.log('Fetch failed');
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            return connected;
+        }
+
+
+        function toggleConnection(user_id) {
+            getOnlineUsers()
+                .then(res => {
+                    let online = false;
+                    console.log(res);
+                    if (res.includes(user_id))
+                        online = true;
+
+                    if (!online) {
+
+                        socket.emit('add-user', user_id);
+                        document.getElementById(`user${user_id}`).style.backgroundColor = 'green';
+                    } else {
+
+                    }
+                })
+                .catch(err => console.log(err));
+        }
+
+        async function connect() {
+            const user_id = document.getElementById('user_id').value;
+            const res = await fetch(`http://localhost:4000/chat/connect`, {
+                method: 'POST',
+                headers: {
+
+                }
+            })
+
+        }
 
         const form = document.getElementById('form');
         const input = document.getElementById('message');
@@ -90,19 +161,19 @@
             if (input.value && user.value && user.value > 0 && provider.value && provider.value > 0) {
                 let msg = { userId: user.value, providerId: provider.value, message: input.value }
                 console.log(msg);
-                socket.emit('chat message', msg);
+                socket.emit('send-msg', msg);
                 input.value = '';
             }
         });
 
-        // socket.on('chat message', (msg) => {
-        //     const item = document.createElement('li');
-        //     item.textContent = msg;
-        //     messages.appendChild(item);
-        //     window.scrollTo(0, document.body.scrollHeight);
-        // });
+        socket?.on('msg-recieve', (msg) => {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
 
-        socket.on('connect', () => {
+        socket?.on('connect', () => {
             console.log('Connected to server');
         });
 

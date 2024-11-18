@@ -4,122 +4,105 @@ const Specialization = require('./specializationModel');
 const Department = require('./departmentModel');
 
 const Provider = sequelize.define('Provider', {
-    fullName: {
-        type: DataTypes.STRING,
+    firstName: {
+        type: DataTypes.STRING(30),
         allowNull: true,
     },
-
+    lastName: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+    },
+    middleName: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
     },
-
+    category: {
+        type: DataTypes.ENUM('doctor', 'nurse', 'pharmacist', 'labTechnician'),
+        allowNull: false,
+        defaultValue: 'doctor',
+    },
     profilePic: {
         type: DataTypes.STRING(100),
         allowNull: true,
     },
-
     phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
     },
-
-    specializationId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Specialization,
-            key: 'id'
-        },
-
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-
-    departmentId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Department,
-            key: 'id'
-        },
-
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-
     sector: {
         type: DataTypes.STRING(100),
-        allowNull: true
+        allowNull: true,
     },
-
     gender: {
         type: DataTypes.ENUM('male', 'female'),
-        allowNull: true
+        allowNull: true,
     },
-
     age: {
         type: DataTypes.INTEGER,
-        allowNull: true
+        allowNull: true,
     },
-
     address: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
+        allowNull: true,
     },
-
+    city: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+    },
+    country: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-
-    profilePic: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-
     isVerified: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
+    },
+
+    certification: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
     },
 
     yearsOfExperience: {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-
     aboutMe: {
         type: DataTypes.STRING,
         allowNull: true,
     },
-
     dateOfBirth: {
         type: DataTypes.DATEONLY,
         allowNull: true,
     },
-    address: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-    },
+}, {
+    tableName: 'providers',
+    updatedAt: false,
+});
 
-    city: {
-        type: DataTypes.STRING(30),
-        allowNull: true,
-    },
+// Associations
+Specialization.hasMany(Provider, {
+    foreignKey: 'specializationId',
+});
+Provider.belongsTo(Specialization, {
+    foreignKey: 'specializationId',
+});
 
-    country: {
-        type: DataTypes.STRING(30),
-        allowNull: true,
-    },
-
-
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-},
-    {
-        tableName: 'providers',
-        updatedAt: false
-    });
+Department.hasMany(Provider, {
+    foreignKey: 'departmentId',
+});
+Provider.belongsTo(Department, {
+    foreignKey: 'departmentId',
+});
 
 module.exports = Provider;
