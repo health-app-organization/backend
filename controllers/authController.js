@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users/userModel');
 const Provider = require('../models/providers/providerModel');
+const { sendEmail } = require('../services/email.service');
 const dotenv = require('dotenv');
 dotenv.config();
 const env = process.env
@@ -43,48 +44,59 @@ exports.login = async (req, res) => {
 }
 
 exports.register = async (req, res) => {
-    const { email, password, phone } = req.body;
+    const { email, password, phoneNumber } = req.body;
     const { status } = req.params;
 
-    if (!email || !password || !phone) {
+    if (!email || !password || !phoneNumber) {
         return res.status(400).json({ error: "Please provide all fields" });
     }
 
     try {
-        if (status === 'user') {
-            let user = await User.findOne({
-                where: { email: email }
-            })
 
-            if (user) {
-                return res.status(400).json({ error: "User already exists" });
-            }
+        let user = await (status === 'user' ? User : Provider).findOne({
+            where: { email: email }
+        })
 
-            user = await User.create({
-                email: email,
-                password: password,
-                phone: phone,
-            });
-        } else {
-            let provider = await Provider.findOne({
-                where: { email: email }
-            })
-
-            if (provider) {
-                return res.status(400).json({ error: "Provider already exists" });
-            }
-
-            provider = await Provider.create({
-                email: email,
-                passworPd: password,
-                phone: phone,
-            });
+        if (user) {
+            return res.status(400).json({ error: `${status === 'user' ? 'User' : 'Provider'} already exists` });
         }
 
-        res.status(200).json({ message: 'Provider created successfully', user: user });
+        user = await User.create({
+            email: email,
+            password: password,
+            phoneNumber: phoneNumber,
+        });
+
+        let to = email;
+        let subject = 'HEALTHAPP';
+        let html = `<h1>Welcome to HEALTHAPP</h1>
+        <p>Hi,</p>
+        <p>Thank you for choosing HealthApp</p>`;
+
+        let emailSendStatus = 'initial';
+
+        await sendEmail(to, subject, '', html)
+            .then((res) => {
+                emailSendStatus = 'success';
+                //console.log(res);
+            })
+            .catch((err) => {
+                emailSendStatus = 'failed';
+                console.log(err);
+            });
+
+
+        res.status(200).json({
+            message: `${status === 'user' ? 'User' : 'Provider'} created successfully`,
+            user: user,
+            emailSendStatus: emailSendStatus
+        });
     }
     catch (error) {
-        res.status(500).json({ message: "Error creating provider", error: error.message });
+        res.status(500).json({
+            message: `Error creating ${status === 'user' ? 'User' : 'Provider'}`,
+            error
+        });
     }
 }
 

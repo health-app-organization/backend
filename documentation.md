@@ -20,11 +20,13 @@
 
     - [profile](#profile)
 
-3. otp
+3. password
 
-    a. send otp
+    - [send otp](#send-otp)
 
-    b. verify otp
+    - [verify otp](#verify-otp)
+
+    - [Reset Password](#reset-password)
 
 4. notifications
 
@@ -558,6 +560,182 @@
       OR 
           {
             "error" : "User not found"
+          }
+
+          #send-otp
+
+<a id="#send-otp"></a>
+
+## Send OTP
+
+*send an email otp.*
+
+- **URL**
+
+  /:status/password/reset/request-otp
+
+- **Method**
+
+  `POST`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]` (unprotected for now)
+
+- **URL Params**
+
+  `[status=string (user, provider)]`
+
+- **Query Params**
+
+  none
+
+- **Data Params**
+
+  - **email:** `string` (required)
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+
+        {
+            message: 'OTP sent to your email',
+            otp: (string),
+            emailSendStatus: ['success', 'failed'],
+            token: (string)
+        }
+
+- **Error Response:**
+
+  - **Code:** 500 INTERNAL SERVER ERROR
+
+      **Content:** 
+
+          { 
+            message: "Internal server error",
+            error: (json)
+          }
+
+   - **Code:** 404 NOT FOUND
+
+      **Content:** 
+          {
+            "error" : "User not found"
+          }
+
+
+    <a id="#verify-otp"></a>
+
+## Verify OTP
+
+*verify the email otp.*
+
+- **URL**
+
+  /:status/password/reset/verify-otp
+- **Method**
+
+  `POST`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`
+
+- **URL Params**
+
+  `[status=string (user, provider)]`
+
+- **Query Params**
+
+  none
+
+- **Data Params**
+
+  - **email:** `string` (required)
+  - **otp:** `string` (required)
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+
+        {
+          message: 'Password reset approved',
+          token: (string)
+        }
+
+- **Error Response:**
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+
+
+    <a id="#reset-password"></a>
+
+## Reset Password
+
+*Reset your password.*
+
+- **URL**
+
+  /:status/password/reset/reset_password
+
+- **Method**
+
+  `POST`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`
+
+- **URL Params**
+
+  `[status=string (user, provider)]`
+
+- **Query Params**
+
+  none
+
+- **Data Params**
+
+  - **password:** `string` (required)
+  - **confirmPassword:** `string` (required)
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+
+        {
+           message: 'Password reset successful'
+        }
+
+- **Error Response:**
+ 
+ - **Code:** 400 BAD REQUEST
+
+      **Content:** 
+
+          { 
+            error:  "Passwords do not match"
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
           }
 
         

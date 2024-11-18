@@ -1,5 +1,6 @@
 const { where } = require('sequelize');
 const User = require('../models/users/userModel');
+const Provider = require('../models/providers/providerModel');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const { env } = require('process');
@@ -11,9 +12,11 @@ const bcryptjs = require('bcryptjs');
 dotenv.config();
 
 // Forgot password logic
-exports.verifyEmail = async (req, res) => {
+exports.sendOTP = async (req, res) => {
+    const { status } = req.params;
+
     try {
-        const user = await User.findOne(
+        const user = await (status === 'user' ? User : Provider).findOne(
             {
                 attributes: ['id', 'email'],
                 where: { email: req.body.email }
@@ -98,12 +101,14 @@ exports.verifyOTP = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
+    const { status } = req.params;
+
     const { payload, body } = req;
     if (!payload || payload.type !== 'password_reset') return res.status(401).json({ error: "Unauthorized" });
 
     if (body.password !== body.confirmPassword) return res.status(400).json({ error: "Passwords do not match" });
 
-    const user = await User.update(
+    const user = await (status === 'user' ? User : Provider).update(
         { password: await bcryptjs.hash(body.password, 10) },
         {
             where: {

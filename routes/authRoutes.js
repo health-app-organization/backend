@@ -7,8 +7,8 @@ const passwordController = require('../controllers/passwordController')
 router.post('/:status/login', authController.login);
 router.post('/:status/register', authController.register);
 router.post('/:status/me', auth.authenticateToken, authController.me);
-router.post('/forgot_password', passwordController.verifyEmail);
-router.post('/verify_otp', auth.authenticateToken, passwordController.verifyOTP);
-router.post('/reset_password', auth.authenticateToken, passwordController.resetPassword);
+router.post('/:status/password/reset/request-otp', passwordController.sendOTP);
+router.post('/:status/password/reset/verify-otp', auth.authenticateToken, passwordController.verifyOTP);
+router.post('/:status/password/reset/reset_password', auth.authenticateToken, passwordController.resetPassword);
 
 module.exports = router;
