@@ -35,6 +35,12 @@ const Notification = sequelize.define('Notification',
 
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
+        },
+
+        type: {
+            type: DataTypes.ENUM('user', 'provider'),
+            allowNull: false,
+            defaultValue: 'user'
         }
     })
 

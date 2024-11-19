@@ -29,16 +29,17 @@
     - [Reset Password](#reset-password)
 
 4. appointments
-  - [show all appointments](#show-all-appointments)
-  - [show appointment by userid] (#show-appointment-by-userid)
-  - [create appointment](#create-appointment)
-  - [update appointment](#update-appointment)
-  - [delete appointment](#delete-appointment)
+    - [show all appointments](#show-all-appointments)
+    - [show appointment by userid](#show-appointment-by-userid)
+    - [create appointment](#create-appointment)
+    - [update appointment](#update-appointment)
+    - [delete appointment](#delete-appointment)
 4. notifications
 
-    a. show notifications
-
-    b. delete notification
+    - [show notifications](#show-notifications)
+    - [create notifications](#create-notifications)
+    - [mark notifications as read](#mark-notifications-as-read)
+    - [delete notifications](#delete-notifications)
 
 5. orders
 
@@ -1006,6 +1007,191 @@
 - **Method**
 
   `DELETE`
+
+  
+
+  <a id="#show-notifications"></a>
+
+  ## Show all notifications
+
+  *Show all notifications.*
+
+- **URL**
+
+  /notifications
+
+- **Method**
+
+  `GET`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`(Unprotected for now)
+
+- **URL Params**
+
+  status: `string` (optional) [user, provider]
+  id: `number` (optional)
+
+- **Query Params**
+
+  page: `number` (optional)
+  count: `number` (optional)
+  metadata: `boolean` (optional) [true, false]
+
+- **Success Response:**
+
+- **Data Params**
+
+  none
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+  {
+    data: [
+    {
+      "id": 1,
+      "subject": "Welcome to the platform!",
+      "message": "We are excited to have you onboard. Explore our services now.",
+      "read": false,
+      "userId": 1,
+      "type": "user",
+      "createdAt": "2024-11-19T02:54:31.000Z",
+      "updatedAt": "2024-11-19T02:54:31.000Z"
+    },
+  ]
+  }
+- **Error Response:**
+ 
+ - **Code:** 500 INTERNAL SERVER ERROR
+
+      **Content:** 
+
+          { 
+            error:  error
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+
+<a id="#create-notifications"></a>
+
+## Create Notifcation
+
+*Create a new notifications.*
+
+- **URL**
+
+  /notifications/create
+
+- **Method**
+
+  `POST`
+
+- **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`
+
+- **URL Params**
+
+    none
+
+- **Query Params**
+
+    none
+
+- **Data Params**
+
+  - **subject:** `string` (required)
+  - **message:** `string` (required)
+  - **read:** `boolean` (required)
+  - **userId:** `int` (required)
+  - **type:** `string enum` (required) (user, provider)
+
+
+- **Success Response:**
+
+  - **Code:** 200
+
+      **Content:**
+
+        {
+          `new appointment obj`
+        }
+
+- **Error Response:**
+ 
+ - **Code:** 400 BAD REQUEST
+
+      **Content:** 
+
+          { 
+            error:  "Passwords do not match"
+          }
+
+
+  - **Code:** 401 UNAUTHORIZED
+
+      **Content:** 
+
+          { 
+            error: "Unauthorized"
+          }
+<a id="#mark-notifications-as-read"></a>
+
+  ## Mark as Read
+
+*Mark notification as read*
+
+- **URL**
+
+  /appointments/update/:id
+
+- **Method**
+
+  `PUT`
+
+  - **Header Params**
+
+  - **Authorization:** `string [Bearer Token]`
+
+- **URL Params**
+
+  none
+
+- **Query Params**
+
+  none
+
+- **Data Params**
+
+  - **read:** `boolean` (required) [true/false]
+
+  <a id="#delete-notification"></a>
+
+  ## Delete Notification
+
+*Delete an existing notification.*
+
+- **URL**
+
+  /notifications/delete/:id
+
+- **Method**
+
+  `DELETE`
+
+
+
 
 
 

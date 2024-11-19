@@ -55,10 +55,7 @@ exports.getAppointmentsByUserId = async (req, res) => {
     const { page, count, state } = req.query;
     let { metadata } = req.query;
 
-    if (page && metadata !== 'false')
-        metadata = true;
-    if (metadata === 'false')
-        metadata = false
+    metadata = page && metadata !== 'false' ? true : false;
 
     let condition = {};
     if (status === 'user')

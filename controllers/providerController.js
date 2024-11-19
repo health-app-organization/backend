@@ -12,9 +12,7 @@ exports.getAllProviders = async (req, res) => {
     const { page, count, fields } = req.query;
     let { metadata } = req.query
 
-    if (page && metadata !== 'false') {
-        metadata = true;
-    }
+    metadata = page && metadata !== 'false' ? true : false;
 
     try {
         const providers = await Provider.findAll(
