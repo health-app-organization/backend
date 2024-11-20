@@ -38,6 +38,9 @@ const appointmentRoutes = require('./src/routes/appointmentRoutes');
 const providerRoutes = require('./src/routes/providerRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
 
+app.get('/', (req, res) => {
+    res.send('Welcome to Health API')
+})
 
 app.use('/chat', chatRoutes);
 app.use('/users', userRoutes);
