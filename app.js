@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const { Server } = require('socket.io');
-const { authenticate } = require('./controllers/chatController');
+const { authenticate } = require('./src/controllers/chatController');
 //const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 
@@ -14,7 +14,7 @@ const HOST = process.env.HOST || 'localhost';
 const api = `http://${HOST}:${PORT}`;
 
 //Import middleware
-const auth = require('./middleware/authenticateToken');
+const auth = require('./src/middleware/authenticateToken');
 const { createServer } = require('http');
 const app = express();
 const httpServer = createServer(app);
@@ -23,21 +23,20 @@ const httpServer = createServer(app);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
 // Set the view engine (optional)
 app.set('view engine', 'pug');
 
 // Import route modules
-const userRoutes = require('./routes/userRoutes');
-const otpRoutes = require('./routes/otpRoutes');
-const authRoutes = require('./routes/authRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const testReportRoutes = require('./routes/testReportRoutes');
-const chatRoutes = require('./routes/chatRoutes');
-const appointmentRoutes = require('./routes/appointmentRoutes');
-const providerRoutes = require('./routes/providerRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const otpRoutes = require('./src/routes/otpRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
+const testReportRoutes = require('./src/routes/testReportRoutes');
+const chatRoutes = require('./src/routes/chatRoutes');
+const appointmentRoutes = require('./src/routes/appointmentRoutes');
+const providerRoutes = require('./src/routes/providerRoutes');
+const transactionRoutes = require('./src/routes/transactionRoutes');
 
 
 app.use('/chat', chatRoutes);

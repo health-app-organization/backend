@@ -1184,9 +1184,7 @@
 
 - **URL**
 
-  /notifications/delete/:id
-
-- **Method**
+  /notifications/delete/:- **Method**
 
   `DELETE`
 

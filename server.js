@@ -1,5 +1,5 @@
 const { httpServer } = require('./app')
-const sequelize = require('./db/database');
+const sequelize = require('./src/db/database');
 const dotenv = require('dotenv');
 
 dotenv.config();
