@@ -27,6 +27,7 @@ app.use(cookieParser());
 app.set('view engine', 'pug');
 
 // Import route modules
+var indexRouter = require('./src/routes/index');
 const userRoutes = require('./src/routes/userRoutes');
 const otpRoutes = require('./src/routes/otpRoutes');
 const authRoutes = require('./src/routes/authRoutes');
@@ -38,7 +39,7 @@ const appointmentRoutes = require('./src/routes/appointmentRoutes');
 const providerRoutes = require('./src/routes/providerRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
 
-
+app.use('/', indexRouter);
 app.use('/chat', chatRoutes);
 app.use('/users', userRoutes);
 app.use('/otp', otpRoutes);
