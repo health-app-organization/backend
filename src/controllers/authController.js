@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/users/userModel');
 const Provider = require('../models/providers/providerModel');
 const { sendEmail } = require('../services/email.service');
+const { generateOTP } = require('../utils/otpGetnerator');
 const dotenv = require('dotenv');
 dotenv.config();
 const env = process.env
@@ -44,34 +45,35 @@ exports.login = async (req, res) => {
 }
 
 exports.register = async (req, res) => {
-    const { email, password, phoneNumber } = req.body;
+    const { email } = req.body;
     const { status } = req.params;
 
-    if (!email || !password || !phoneNumber) {
-        return res.status(400).json({ error: "Please provide all fields" });
+    if (!email) {
+        return res.status(400).json({ error: "Please provide an email" });
     }
 
     try {
 
         let user = await (status === 'user' ? User : Provider).findOne({
-            where: { email: email }
+            where: { email: email },
+            attributes: ['id', 'email']
         })
 
         if (user) {
             return res.status(400).json({ error: `${status === 'user' ? 'User' : 'Provider'} already exists` });
         }
 
-        user = await User.create({
-            email: email,
-            password: password,
-            phoneNumber: phoneNumber,
-        });
+        let otp = generateOTP(6);
+
+        console.log(otp);
 
         let to = email;
+        console.log(email)
         let subject = 'HEALTHAPP';
         let html = `<h1>Welcome to HEALTHAPP</h1>
         <p>Hi,</p>
-        <p>Thank you for choosing HealthApp</p>`;
+        <p>Use the OTP below to verify your email</p>
+        <h1 style="margin: 20px; font-size: 20px;">${otp}</h1>`;
 
         let emailSendStatus = 'initial';
 
@@ -85,20 +87,43 @@ exports.register = async (req, res) => {
                 console.log(err);
             });
 
+        //generate token
+        const jwtToken = jwt.sign(
+            {
+                payload: {
+                    email: email,
+                    otp: otp
+                }
+            },
+            process.env.TOKEN_SECRET,
+            { expiresIn: process.env.PASSWORD_OTP_EXPIRE_TIME * 60 }
+        );
 
-        res.status(200).json({
-            message: `${status === 'user' ? 'User' : 'Provider'} created successfully`,
-            user: user,
-            emailSendStatus: emailSendStatus
+        return res.status(200).json({
+            message: 'OTP sent to your email',
+            otp: otp,
+            emailSendStatus: emailSendStatus,
+            token: jwtToken
         });
     }
     catch (error) {
-        res.status(500).json({
-            message: `Error creating ${status === 'user' ? 'User' : 'Provider'}`,
-            error
-        });
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
+
+exports.verifyOTP = async (req, res) => {
+    const { payload, body } = req;
+    if (!payload) return res.status(401).json({ error: "Unauthorized" });
+
+    if (body.email !== payload.email) return res.status(401).json({ error: "Unauthorized" });
+
+    if (body.otp !== payload.otp) return res.status(401).json({ error: "Invalid OTP" });
+
+
+    return res.status(200).json({
+        message: 'OTP verified successfully'
+    })
+};
 
 exports.me = async (req, res) => {
     const { payload } = req;

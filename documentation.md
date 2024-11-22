@@ -23,7 +23,7 @@
 3. password
 
     - [send otp](#send-otp)
-
+#send-otp
     - [verify otp](#verify-otp)
 
     - [Reset Password](#reset-password)
@@ -475,8 +475,6 @@
 - **Data Params**
 
   - **email:** `string` (required)
-  - **password:** `string` (required)
-  - **phone:** `string` (required)
 
 - **Success Response:**
 
@@ -485,13 +483,10 @@
       **Content:**
 
         {
-          "message": "User created successfully",
-          "user": {
-            "id": 1,
-            "email": "test@gmail.com",
-            "phone": "1234567890",
-            "role": "user"
-          }
+          "message": "OTP sent to your email",
+          "otp": otp,
+          "emailSendStatus": success,
+          "token": token
         }
 
 - **Error Response:**
@@ -501,14 +496,13 @@
       **Content:** 
 
           { 
-            error: "Email already exists"
+            error: "Please provide an email"
           }
-        
-    OR
+OR
+      {
+        error: "User already exists"
+      }
 
-        {
-          error: "Email already exists"
-        }
 
   - **Code:** 500 INTERNAL SERVER ERROR
 
@@ -579,7 +573,7 @@
 
 - **URL**
 
-  /:status/password/reset/request-otp
+  /:status/password/reset/request_otp
 
 - **Method**
 
@@ -641,7 +635,7 @@
 
 - **URL**
 
-  /:status/password/reset/verify-otp
+  /:status/password/reset/verify_otp
 - **Method**
 
   `POST`

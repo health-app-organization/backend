@@ -11,32 +11,6 @@ const Conversation = sequelize.define('Conversation',
             primaryKey: true
         },
 
-        userId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-
-            references: {
-                model: User,
-                key: 'id'
-            },
-
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        },
-
-        providerId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-
-            references: {
-                model: Provider,
-                key: 'id'
-            },
-
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        },
-
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false,
@@ -48,6 +22,24 @@ const Conversation = sequelize.define('Conversation',
             defaultValue: DataTypes.NOW,
             onUpdate: DataTypes.NOW
         },
-    })
+    }
+)
+
+
+Provider.hasMany(Conversation, {
+    foreignKey: 'providerId'
+})
+
+Conversation.belongsTo(Provider, {
+    foreignKey: 'providerId'
+})
+
+User.hasMany(Conversation, {
+    foreignKey: 'providerId'
+})
+
+Conversation.belongsTo(User, {
+    foreignKey: 'providerId'
+})
 
 module.exports = Conversation;

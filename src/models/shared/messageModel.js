@@ -11,18 +11,6 @@ const Message = sequelize.define('Message',
             primaryKey: true
         },
 
-        userId: {
-            type: DataTypes.INTEGER,
-
-            references: {
-                model: User,
-                key: 'id'
-            },
-
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        },
-
         message: {
             type: DataTypes.TEXT,
             allowNull: false
@@ -40,17 +28,15 @@ const Message = sequelize.define('Message',
             defaultValue: false
         },
 
-        conversationId: {
-            type: DataTypes.INTEGER,
-
-            references: {
-                model: Conversation,
-                key: 'id'
-            },
-
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        }
     })
+
+Conversation.hasMany(Message, {
+    foreignKey: 'conversationId'
+})
+
+Message.belongsTo(Conversation, {
+    foreignKey: 'conversationId'
+})
+
 
 module.exports = Message;

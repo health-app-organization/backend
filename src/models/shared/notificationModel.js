@@ -26,22 +26,19 @@ const Notification = sequelize.define('Notification',
             defaultValue: false
         },
 
-        userId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: User,
-                key: 'id'
-            },
-
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        },
-
         type: {
             type: DataTypes.ENUM('user', 'provider'),
             allowNull: false,
             defaultValue: 'user'
         }
     })
+
+User.hasMany(Notification, {
+    foreignKey: 'userId'
+})
+
+Notification.belongsTo(User, {
+    foreignKey: 'userId'
+})
 
 module.exports = Notification;
