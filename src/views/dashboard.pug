@@ -1,0 +1,284 @@
+//- dashboard.pug
+html
+  head
+    title Dashboard
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f4f4f9;
+      }
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .chat-container{
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 20px;
+      }
+
+      .chat-list{
+        margin:0;
+        padding-left: 0;
+        list-style: none;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .chat-partner{
+        background-color: #eaeaea;
+        color: black;
+        padding: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3 ease-in-out;
+        position: relative;
+      }
+      
+
+      .chat-partner:hover, .chat-partner.active{
+        background-color: #007bff;
+        color: white;
+      }
+
+      .chat-box {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .chat-box .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .chat-box .message.user {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+      }
+      .chat-box .message.other {
+        background-color: #eaeaea;
+        color: black;
+      }
+      .chat-input {
+        display: flex;
+        margin-top: 10px;
+      }
+
+      .online{
+        background-color: red;
+        border-radius: 50%;
+        width: 5px;
+        height: 5px;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+      }
+      
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px 0 0 5px;
+      }
+      .chat-input button {
+        padding: 10px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border-radius: 0 5px 5px 0;
+      }
+      .chat-input button:hover {
+        background-color: #0056b3;
+      }
+  body
+    .container
+      .header
+        h1 Dashboard
+      h2 Welcome #{user.firstName + ' ' + user.lastName},
+      .chat-container
+        ul.chat-list
+            li Chat with
+            //- - for(const partner of partners)
+            //-   li.chat-partner(id=`${partner.id}`) #{partner.firstName + ' ' + partner.lastName}
+        .chat-box(id="chatBox")
+        //- Messages will appear here
+      .chat-input
+        input(type="hidden" id="userId" value=`${user.id}`)
+        input(type="hidden" id="userRole" value=`${user.role}`)
+        input(type="hidden" id="username" value=`${user.firstName + ' ' + user.lastName}`)
+        input(type="text" id="chatInput" placeholder="Type a message...")
+        button(onclick="sendMessage()") Send
+    script(src="/socket.io/socket.io.js") 
+    script.
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        let userId = document.getElementById('userId').value
+        let userRole = document.getElementById('userRole').value
+        let username = document.getElementById('username').value
+        console.log('username', username);
+        let partnerId;
+
+        // Get all cookies as a single string
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.split('=');
+                if (key === name) {
+                    return decodeURIComponent(value);
+                }
+            }
+            return null; // Return null if the cookie is not found
+        }
+
+        // Usage
+        const token = getCookie('token');
+        
+        const URL = "http://localhost:4000";
+        const socket = io(URL, { 
+            autoConnect: false ,
+          });
+
+        socket.auth = { token };
+
+       socket.connect();
+
+        chatInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && e.target.value.trim() !== '') {
+            sendMessage();
+        }})
+
+        function connectTo(e){
+         chatBox.innerHTML = '';
+          const chatPartners = document.querySelectorAll('.chat-partner');
+              chatPartners.forEach(partner => partner.classList.remove('active'));
+              const partner = e.target;
+              console.log('partner', partner);
+                partnerId = partner.getAttribute('id');                                                       
+                partner.classList.add('active');
+
+                let room = {
+                    userId: Number(userRole === 'user' ? userId : partnerId),
+                    providerId: Number(userRole === 'user' ? partnerId : userId)
+                }
+
+                socket?.emit('load-msg' , room)
+
+                socket?.emit('private-msg', room)
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+
+            if (message && userId && partnerId) {
+              let msgObj = {
+                  from: Number(userId),
+                  to: Number(partnerId),
+                  role: userRole,
+                  message,
+                  timestamp: new Date()
+              }
+
+              socket.emit('send-msg', msgObj);
+              chatInput.value = '';
+            }
+
+            //- TODO - Create an exception handler for null and undefined values to and from
+        }
+
+        function addMessages(msg){
+          const messageDiv = document.createElement('div');
+            messageDiv.className = msg.role === 'user' || msg.from === 'user' ? 'message user' : 'message other'
+            messageDiv.textContent = msg.message;
+            chatBox.appendChild(messageDiv);
+        }
+
+        //- socket.on("connect", () => {
+        //-   console.log("recovered?", socket.recovered);
+
+        //-   setTimeout(() => {
+        //-     if (socket.io.engine) {
+        //-       // close the low-level connection and trigger a reconnection
+        //-       socket.io.engine.close();
+        //-     }
+        //-   }, 10000);
+        //- });
+
+        socket?.on('msg-recieve', (msg) => {
+          console.log('Message received:', msg);
+            addMessages(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        socket?.on('msg-loaded', (data) => {
+          console.log(data);
+          data?.forEach(item => {
+            addMessages(item);
+          })
+           chatBox.scrollTop = chatBox.scrollHeight;
+        })
+
+        socket.on('chat-peers', (data) => {
+          console.log(data);
+             const chatList = document.querySelector('.chat-list');
+             chatList.innerHTML = '';
+          const role = userRole === 'user' ? 'provider' : 'user'
+          data.forEach(peer => {
+            const li = document.createElement('li');
+            li.setAttribute('id', peer[role].id);
+            li.classList.add('chat-partner');
+            li.addEventListener('click', connectTo)
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = `${peer[role].firstName} ${peer[role].lastName}`
+            textSpan.style.pointerEvents = 'none';
+            li.appendChild(textSpan);
+
+            if(peer[role].online){
+              const connectionSpan = document.createElement('span');
+              connectionSpan.classList.add('online');
+              li.appendChild(connectionSpan);
+            }
+
+            chatList.appendChild(li);
+          })
+        })
+
+        socket.on('user-disconnected', (data) => {
+          socket.emit('fetch-peers', '')
+        })
+
+        socket.on('user-connected', (data) => {
+          console.log('a user connected', data)
+          socket.emit('fetch-peers', '')
+        })
+
+        socket.on("connect_error", (err) => {
+          if (err) {
+            console.log(err.message);
+          }
+        });
