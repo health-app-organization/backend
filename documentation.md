@@ -1182,11 +1182,165 @@ OR
 
   `DELETE`
 
+# Chat API Documentation
+## Initialization
 
+``` javascript
+  const URL = "http://localhost:4000";
 
+  const socket = io(URL, autoConnect: false);
 
+  socket.auth = { token };
 
+  socket.connect();
+```
+or
 
+``` javascript
+  const URL = "http://localhost:4000";
+  
+  const socket = io(URL, 
+    autoConnect: false,
+    auth: { token }
+  );
 
+  socket.connect();
+```
+Note: The token is the same token that is used to authenticate the user during login.
 
+## Chat Events Documentation
 
+## From Client to Server (Emit)
+
+### 1. Sending a Message
+- **Event**: `send-msg`
+- **Payload**:
+  - **from**: `int` (required) — ID of the sending user.
+  - **to**: `int` (required) — ID of the receiving user.
+  - **role**: `string enum` [user, provider] (required) — Role of the `from` user.
+  - **message**: `string` (required) — Message to be delivered.
+
+- **Description**:  
+  Messages can only be sent between a user and a provider. The API does not support communication between users or between providers.
+
+---
+
+### 2. Fetching Chat Peers
+- **Event**: `fetch-peers`
+- **Payload**: None
+
+- **Description**:  
+  Retrieves the peers that the user has already started a conversation with. Once the server fetches the peers, it emits the `chat-peers` event.
+
+---
+
+### 3. Private Message
+- **Event**: `private-msg`
+- **Payload**:
+  - **userId**: `int` (required) — ID of the user.
+  - **providerId**: `int` (required) — ID of the provider.
+
+- **Description**:  
+  This event creates a conversation between a user and a provider if it does not exist. If a conversation already exists, it loads all previous chats and emits the `msg-loaded` event.
+
+---
+
+## From Server to Client (Subscribe)
+
+### 1. Receiving a Message
+- **Event**: `msg-recieve`
+- **Data**:
+  - **from**: `int` (required) — ID of the sending user.
+  - **to**: `int` (required) — ID of the receiving user.
+  - **role**: `string enum` [user, provider] (required) — Role of the `from` user.
+  - **message**: `string` (required) — Message to be delivered.
+
+- **Description**:  
+  This event is triggered whenever the client receives a message from another user.
+
+---
+
+### 2. Receiving Chat History
+- **Event**: `chat-peers`
+- **Data (Collection)**:
+  - **id**: `int` (required) — Message ID.
+  - **from**: `string` (required) — Status of the sender.
+  - **message**: `string` (required) — Message to be delivered.
+  - **timestamp**: `string` — Time the message was sent.
+  - **conversationId**: `int` (required) — ID of the conversation both peers are part of.
+  - **isDeleted**: `boolean` — Indicates if the message was deleted.
+
+- **Description**:  
+  This event is triggered whenever the server loads the previous chats between both parties.
+
+---
+
+### 2. Receiving Previous Messages
+
+- **Event**: `msg-loaded`
+- **Data (Collection)**:
+
+### a) When the Client is a **Provider**:
+
+```json
+{
+  "id": 13,
+  "createdAt": "2024-12-28T19:11:40.000Z",
+  "userId": 6,
+  "providerId": 5,
+  "user": {
+    "id": 6,
+    "firstName": "Denen",
+    "lastName": "Awar",
+    "email": "awardenen@gmail.com",
+    "online": true
+  }
+}
+```
+
+### b) When the Client is a **User**:
+
+  ```json
+  {
+    "id": 8,
+    "createdAt": "2024-12-27T11:37:02.000Z",
+    "userId": 6,
+    "providerId": 1,
+    "provider": {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "johndoe@example.com",
+      "online": false
+    }
+  }
+  ```
+
+### 3. When a peer disconnects
+
+- **Event**: `user-disconnected`
+- **Data**:
+
+``` json
+{
+    "id": 6,
+    "email": "awardenen@gmail.com",
+    "role": "user"
+}
+```
+
+- **Description**: This event is triggered whenever a peer disconnects from the server.
+### 4. When a peer connects
+- **Event**: `user-connected`
+- **Data**:
+same as above
+
+- **Description**: This event is triggered whenever a peer connects to the server.
+
+- **Description**: This event is triggered whenever a peer disconnects from the server.
+### 5. Connection error
+- **Event**: `connect_error`
+- **Data**:
+error object
+
+- **Description**: This event is triggered when an attempt to connect to the server fails.

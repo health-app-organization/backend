@@ -11,6 +11,11 @@ const Message = sequelize.define('Message',
             primaryKey: true
         },
 
+        from: {
+            type: DataTypes.ENUM('user', 'provider'),
+            allowNull: false,
+        },
+
         message: {
             type: DataTypes.TEXT,
             allowNull: false
@@ -28,14 +33,18 @@ const Message = sequelize.define('Message',
             defaultValue: false
         },
 
-    })
+    }, {
+    timestamps: false
+})
 
 Conversation.hasMany(Message, {
-    foreignKey: 'conversationId'
+    foreignKey: 'conversationId',
+    onDelete: 'CASCADE'
 })
 
 Message.belongsTo(Conversation, {
-    foreignKey: 'conversationId'
+    foreignKey: 'conversationId',
+    onDelete: 'CASCADE'
 })
 
 

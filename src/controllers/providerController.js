@@ -1,3 +1,4 @@
+const bcryptjs = require('bcryptjs');
 const Department = require('../models/providers/departmentModel');
 const Experience = require('../models/providers/experienceModel');
 const Provider = require('../models/providers/providerModel');
@@ -54,10 +55,12 @@ exports.getAllProviders = async (req, res) => {
 
 exports.createProvider = async (req, res) => {
     try {
+        req.body.password = await bcryptjs.hash(req.body.password, 10);
         const newProvider = await Provider.create(req.body);
+        newProvider.password = undefined;
         res.status(201).json(newProvider);
     } catch (error) {
-        res.status(400).json({ message: 'Error creating providers', error });
+        res.status(400).json({ message: 'Error creating providers', error: error.message });
     }
 };
 

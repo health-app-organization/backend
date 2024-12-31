@@ -16,6 +16,17 @@ const Provider = sequelize.define('Provider', {
         type: DataTypes.STRING(30),
         allowNull: true,
     },
+
+    fullName: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return `${this.firstName} ${this.lastName}`;
+        },
+        set(value) {
+            throw new Error('Do not try to set the `fullName` value!');
+        },
+    },
+
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -33,7 +44,7 @@ const Provider = sequelize.define('Provider', {
     phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
     },
     sector: {
         type: DataTypes.STRING(100),
@@ -85,6 +96,12 @@ const Provider = sequelize.define('Provider', {
         type: DataTypes.DATEONLY,
         allowNull: true,
     },
+
+    online: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
+
 }, {
     tableName: 'providers',
     updatedAt: false,

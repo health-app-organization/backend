@@ -2,9 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const { Server } = require('socket.io');
-const { authenticate } = require('./src/controllers/chatController');
-//const fetch = require('node-fetch');
+const schedule = require("node-schedule");
+const jobs = require("./src/scheduler/nodeScheduler");
+const initializeChatSocket = require('./chat');
+
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -20,78 +21,38 @@ const app = express();
 const httpServer = createServer(app);
 
 // Middleware
+app.use(express.static(path.join(__dirname, 'src/public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 // Set the view engine (optional)
 app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'src/views'));
+
 
 // Import route modules
-const userRoutes = require('./src/routes/userRoutes');
-const otpRoutes = require('./src/routes/otpRoutes');
-const authRoutes = require('./src/routes/authRoutes');
-const notificationRoutes = require('./src/routes/notificationRoutes');
-const orderRoutes = require('./src/routes/orderRoutes');
-const testReportRoutes = require('./src/routes/testReportRoutes');
-const chatRoutes = require('./src/routes/chatRoutes');
-const appointmentRoutes = require('./src/routes/appointmentRoutes');
-const providerRoutes = require('./src/routes/providerRoutes');
-const transactionRoutes = require('./src/routes/transactionRoutes');
+const apiRoutes = require('./src/routes/apiRoutes');
+const webRoutes = require('./src/routes/webRoutes');
+const { log } = require('console');
+const { randomUUID } = require('crypto');
 
 app.get('/', (req, res) => {
     res.send('Welcome to Health API')
 })
 
-app.use('/chat', chatRoutes);
-app.use('/users', userRoutes);
-app.use('/otp', otpRoutes);
-app.use('/auth', authRoutes);
-app.use('/notifications', notificationRoutes);
-app.use('/appointments', appointmentRoutes);
-app.use('/orders', orderRoutes);
-app.use('/reports', testReportRoutes);
-app.use('/providers', providerRoutes);
-app.use('/transactions', transactionRoutes);
+app.use('/api', apiRoutes);
+app.use('/web', webRoutes);
 
 // Error handling for undefined routes
 app.use((req, res, next) => {
     res.status(404).send('Route not found');
 });
 
-const io = new Server(httpServer, {
-    cors: {
-        origin: api,
-        credentials: true
-    }
-});
+jobs.initializeReminders();
 
+// Initialize chat socket
+initializeChatSocket(httpServer, api);
 
-global.onlineUsers = new Map();
-
-io.on('connection', (socket) => {
-    console.log('a user connected');
-
-    global.chatSocket = socket;
-    socket.on('add-user', async (userId) => {
-        console.log(`user${userId} connected`);
-        onlineUsers.set(userId, socket.id);
-        console.log(onlineUsers);
-    });
-
-    socket.on('send-msg', (data) => {
-        console.log('Message sent');
-        console.log(data);
-        const sendUserSocket = onlineUsers.get(data.providerId);
-        if (sendUserSocket) {
-            socket.to(sendUserSocket).emit('msg-recieve', data.message);
-            console.log(data);
-        }
-    })
-
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
-    })
-});
 
 
 module.exports = { httpServer, app };

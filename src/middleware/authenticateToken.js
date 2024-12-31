@@ -21,3 +21,50 @@ exports.authenticateToken = (req, res, next) => {
         }
     )
 }
+
+exports.authenticateCookieToken = (req, res, next) => {
+    const { token } = req.cookies;
+
+    if (!token)
+        return res.status(401).redirect('login');
+
+    jwt.verify(
+        token,
+        process.env.TOKEN_SECRET,
+        (err, decoded) => {
+            if (err) return res.status(401).redirect('login');
+            req.payload = decoded.payload
+            next();
+        }
+    )
+}
+
+
+// exports.authenticateParamToken = (token) => {
+
+//     if (!token)
+//         throw new Error('Token is required');
+
+//     jwt.verify(
+//         token,
+//         process.env.TOKEN_SECRET,
+//         (err, decoded) => {
+//             if (err) throw new Error('Invalid token');
+//             return decoded.payload;
+//         }
+//     )
+// }
+
+
+exports.authenticateParamToken = (token, callback) => {
+    if (!token) {
+        return callback(new Error('Token is required'), null);
+    }
+
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return callback(new Error('Invalid token'), null);
+        }
+        return callback(null, decoded.payload);
+    });
+};

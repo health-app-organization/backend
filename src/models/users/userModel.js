@@ -12,6 +12,17 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING(30),
         allowNull: true,
     },
+
+    fullName: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return `${this.firstName} ${this.lastName}`;
+        },
+        set(value) {
+            throw new Error('Do not try to set the `fullName` value!');
+        },
+    },
+
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -69,6 +80,11 @@ const User = sequelize.define('User', {
     role: {
         type: DataTypes.ENUM('user', 'admin'),
         defaultValue: 'user'
+    },
+
+    online: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 },
     {

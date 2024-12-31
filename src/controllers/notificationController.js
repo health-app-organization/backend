@@ -1,5 +1,6 @@
 const bcryptjs = require('bcryptjs');
 const Notification = require('../models/shared/notificationModel');
+const { pushNotification } = require('../services/pushNotification');
 const { paginate } = require('../utils/services');
 const { DELETE } = require('sequelize/lib/query-types');
 
@@ -44,14 +45,32 @@ exports.getAllNotifications = async (req, res) => {
     }
 };
 
-exports.createNotification = async (req, res) => {
+// exports.createNotification = async (req, res) => {
+//     try {
+//         const newNotification = await Notification.create(req.body);
+//         res.status(201).json(newNotification);
+//     } catch (error) {
+//         res.status(400).json({ message: 'Error creating user', error });
+//     }
+// };
+
+exports.sendNotification = async (to, id, payload) => {
     try {
-        const newNotification = await Notification.create(req.body);
-        res.status(201).json(newNotification);
+        await pushNotification(id, payload);
+
+        await Notification.create({
+            subject: payload.title,
+            message: payload.body,
+            type: to,
+            userId: id
+        });
+
+        console.log("Notification sent");
     } catch (error) {
-        res.status(400).json({ message: 'Error creating user', error });
+        console.error(error);
     }
-};
+}
+
 
 exports.updateNotification = async (req, res) => {
     try {

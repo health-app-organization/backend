@@ -41,7 +41,7 @@ exports.login = async (req, res) => {
         { expiresIn: `${env.TOKEN_EXPIRE_TIME / 60}h` }
     );
 
-    res.status(200).json({ message: 'Login successful', token: token });
+    res.status(200).json({ message: 'Login successful', me: user, token: token });
 }
 
 exports.register = async (req, res) => {
